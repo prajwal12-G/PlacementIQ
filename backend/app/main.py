@@ -21,8 +21,10 @@ from typing import AsyncIterator
 from fastapi import FastAPI
 
 from app.api.auth import router as auth_router
+from app.api.resume import router as resume_router
 from app.core.logger import setup_logging
 from app.db.database import Base, engine
+
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -80,6 +82,8 @@ app = FastAPI(
 # ---------------------------------------------------------------------------
 
 app.include_router(auth_router)
+app.include_router(auth_router)
+app.include_router(resume_router)
 
 # ---------------------------------------------------------------------------
 # Health Endpoints
