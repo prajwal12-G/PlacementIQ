@@ -22,7 +22,7 @@ from app.dependencies.database import get_db
 from app.dependencies.resume import get_resume_service
 from app.dependencies.security import get_current_user
 from app.models.user import User
-from app.schemas.resume import ResumeResponse
+from app.schemas.resume import ResumeListResponse, ResumeResponse
 from app.services.resume_service import ResumeService
 
 router = APIRouter(
@@ -81,6 +81,47 @@ def upload_resume(
     )
 
     response = ResumeResponse.model_validate(resume)
+
+    return response
+
+
+@router.get(
+    "",
+    response_model=ResumeListResponse,
+    status_code=status.HTTP_200_OK,
+    summary="List the authenticated user's resumes",
+    description=(
+        "Return every resume uploaded by the authenticated user, "
+        "ordered from newest to oldest. The list is empty when the "
+        "user has not uploaded any resumes."
+    ),
+)
+def list_user_resumes(
+    db: Session = Depends(get_db),
+    resume_service: ResumeService = Depends(get_resume_service),
+    current_user: User = Depends(get_current_user),
+) -> ResumeListResponse:
+    """List every resume owned by the authenticated user.
+
+    Args:
+        db: Request-scoped SQLAlchemy session (provided by dependency).
+        resume_service: Resume service wired with its repository
+            (provided by dependency).
+        current_user: The authenticated user whose resumes are fetched
+            (provided by dependency).
+
+    Returns:
+        A `ResumeListResponse` containing the user's resume collection.
+        The list is empty when the user has no resumes.
+    """
+    resumes = resume_service.get_user_resumes(
+        db=db,
+        current_user=current_user,
+    )
+
+    response = ResumeListResponse(
+        resumes=[ResumeResponse.model_validate(resume) for resume in resumes],
+    )
 
     return response
 

@@ -104,6 +104,27 @@ class ResumeService:
 
         return new_resume
 
+    def get_user_resumes(
+        self,
+        db: Session,
+        current_user: User,
+    ) -> list[Resume]:
+        """
+        Return every resume owned by the authenticated user.
+
+        Args:
+            db: Active SQLAlchemy session.
+            current_user: The authenticated user whose resumes are fetched.
+
+        Returns:
+            A list of :class:`Resume` ORM instances owned by the authenticated user,
+            ordered from newest to oldest.
+        """
+        return self._resume_repository.get_all_by_user(
+            db,
+            current_user.id,
+        )
+
     # ------------------------------------------------------------------
     # Validation helpers
     # ------------------------------------------------------------------
